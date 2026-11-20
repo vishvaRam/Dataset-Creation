@@ -14,7 +14,8 @@ LOCAL_OUT_DIR = "/workspace/boundingdocs_hard_parquet"
 TMP_CACHE_DIR = "/workspace/tmp_hf_cache"
 SEED = 42
 MAX_WORKERS = 32
-ROWS_PER_OUT_SHARD = 200
+ROWS_PER_OUT_SHARD = 100
+ROW_GROUP_SIZE = 10
 
 SPLIT_QUOTAS = {
     "train": {
@@ -157,7 +158,13 @@ def build_split_shards(all_files, split_prefix, quotas, seed=42):
         chunk = chunk.take(pa.array(perm))
 
         out_file = os.path.join(LOCAL_OUT_DIR, f"{split_prefix}-{out_shard_idx:05d}.parquet")
-        pq.write_table(chunk, out_file, compression="snappy")
+        pq.write_table(
+            chunk,
+            out_file,
+            compression="snappy",
+            row_group_size=ROW_GROUP_SIZE,
+            write_page_index=True,
+        )
         written_files.append(out_file)
         out_shard_idx += 1
         buffer_tables = []
@@ -199,6 +206,7 @@ def main():
         path_in_repo="data",
         repo_id=REPO_OUT,
         repo_type="dataset",
+        delete_patterns=["*.parquet"],  # Removes stale 200-row shards on the Hub
     )
     print(f"\nUpload complete! Dataset live at: https://huggingface.co/datasets/{REPO_OUT}")
 
