@@ -21,8 +21,8 @@ SPLIT_QUOTAS = {
     "train": {
         "funsd": 149,
         "sp-docvqa": 200,
-        "mp-docvqa": 2650,
-        "deepform": 3350,
+        "mp-docvqa": 2700,
+        "deepform": 3401,
         "vrdu": 1651,
     },
     "validation": {
